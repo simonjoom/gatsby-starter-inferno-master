@@ -7,6 +7,35 @@
   Gatsby's inferno starter
 </h1>
 
+<h2 align="left">
+The hack:
+Used the last still not published inferno-v6.rc2
+
+In cache-dir/gatsby-browser-entry force gatsby to use the polyfill create-react-context
+
+    import createContext from 'create-react-context';
+    const StaticQueryContext = createContext({})
+
+In dist/utils/webpack.config!:
+
+        - turn around react-hot-loader for inferno
+        - remove alias directoryPath(`.cache/create-react-context.js`) !because we need the polyfill
+        - create alias react to inferno 
+  
+In dist/utils/babel-loader-helper
+
+requiredPlugins react-hot-loader only for dev mode
+
+In cache-dir/app.js
+
+    require .root without hot-reload for inferno
+
+In dist/bootstrap.js
+
+    same turn around hot-reload for inferno 
+    //require(`./page-hot-reloader`)(graphqlRunner);
+</h2>
+
 Kick off your project with this inferno boilerplate. This barebones starter ships with the main Gatsby configuration files you might need. 
 
 _Have another more specific idea? You may want to check out our vibrant collection of [official and community-created starters](https://next.gatsbyjs.org/docs/gatsby-starters/)._
@@ -55,26 +84,6 @@ If you use react-context please use the polyfill create-react-context as @reach 
     cd my-inferno-starter/
     npm run inferno
     ```
-
-    The hack:
-    Used the last still not published inferno-v6.rc2
-
-    in cache-dir/gatsby-browser-entry force gatsby to use the polyfill create-react-context
-
-    import createContext from 'create-react-context';
-    const StaticQueryContext = createContext({})
-
-    In dist/utils/webpack.config
-        - turn around react-hot-loader for inferno
-        - remove alias directoryPath(`.cache/create-react-context.js`) !because we need the polyfill
-        - create alias react to inferno 
-    In dist/utils/babel-loader-helper
-        requiredPlugins react-hot-loader only for dev mode
-    In cache-dir/app.js
-     require .root without hot-reload for inferno
-    In dist/bootstrap.js
-    same turn around hot-reload for inferno //require(`./page-hot-reloader`)(graphqlRunner);
-
 
 
 3.  **Open the source code and start editing!**
