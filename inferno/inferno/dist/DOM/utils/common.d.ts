@@ -1,0 +1,15 @@
+import { VNode } from './../../core/types';
+export declare const EMPTY_OBJ: {};
+export declare const Fragment: string;
+export declare const LIFECYCLE: Function[];
+export declare function appendChild(parentDOM: any, dom: any): void;
+export declare function insertOrAppend(parentDOM: Element, newNode: any, nextNode: any): void;
+export declare function documentCreateElement(tag: any, isSVG: boolean): Element;
+export declare function replaceChild(parentDOM: Element, newDom: any, lastDom: any): void;
+export declare function removeChild(parentDOM: Element, childNode: Element): void;
+export declare function callAll(arrayFn: Function[]): void;
+export declare function findDOMfromVNode(vNode: VNode): Element | null;
+export declare function removeVNodeDOM(vNode: VNode, parentDOM: Element): void;
+export declare function moveVNodeDOM(vNode: any, parentDOM: any, nextNode: any): void;
+export declare function getComponentName(instance: any): string;
+export declare function createDerivedState(instance: any, nextProps: any, state: any): any;
