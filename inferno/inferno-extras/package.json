@@ -1,6 +1,6 @@
 {
   "name": "inferno-extras",
-  "version": "6.0.0-rc.1",
+  "version": "6.0.0-rc.3",
   "license": "MIT",
   "description": "Collection of utilities for InfernoJS",
   "author": {
@@ -26,5 +26,11 @@
   "module": "dist/index.esm.js",
   "dev:module": "dist/index.dev.esm.js",
   "typings": "dist/index.d.ts",
-  "repository": "https://github.com/infernojs/inferno"
+  "repository": "https://github.com/infernojs/inferno",
+  "dependencies": {
+    "inferno": "^6.0.0-rc.3"
+  },
+  "devDependencies": {
+    "inferno-vnode-flags": "^6.0.0-rc.3"
+  }
 }

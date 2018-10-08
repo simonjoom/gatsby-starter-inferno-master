@@ -1,5 +1,4 @@
 export declare const ERROR_MSG = "a runtime error occured! Use Inferno in development environment to find the error.";
-export declare const isBrowser: boolean;
 export declare const isArray: (arg: any) => arg is any[];
 export declare function isStringOrNumber(o: any): o is string | number;
 export declare function isNullOrUndef(o: any): o is undefined | null;
@@ -13,4 +12,4 @@ export declare function isUndefined(o: any): o is undefined;
 export declare function isObject(o: any): o is object;
 export declare function throwError(message?: string): void;
 export declare function warning(message: string): void;
-export declare function combineFrom(first?: {} | null, second?: {} | null): object;
+export declare function combineFrom(first: {} | null, second: {} | null): object;

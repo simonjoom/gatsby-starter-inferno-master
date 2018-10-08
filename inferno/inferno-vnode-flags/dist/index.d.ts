@@ -15,12 +15,14 @@ export declare const enum VNodeFlags {
     Fragment = 8192,
     InUse = 16384,
     ForwardRef = 32768,
+    Normalized = 65536,
     ForwardRefComponent = 32776,
     FormElement = 448,
     Element = 481,
     Component = 14,
     DOMRef = 2033,
-    ClearInUse = -16385
+    InUseOrNormalized = 81920,
+    ClearInUseNormalized = -81921
 }
 export declare const enum ChildFlags {
     UnknownChildren = 0,

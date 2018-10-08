@@ -1,5 +1,5 @@
-import { _CI, _HI, _L, _MT, _M, _MCCC, _ME, _MFCC, _MR, _MP, Component, createComponentVNode, createPortal, createRenderer, createTextVNode, createVNode, directClone, EMPTY_OBJ, getFlagsForElementVnode, linkEvent, normalizeProps, options, __render, findDOMfromVNode } from 'inferno';
-export { Component, EMPTY_OBJ, createComponentVNode, createPortal, createRenderer, createTextVNode, createVNode, directClone, getFlagsForElementVnode, linkEvent, normalizeProps, options } from 'inferno';
+import { _CI, _HI, _L, _MT, _M, _MCCC, _ME, _MFCC, _MR, _MP, Component, createComponentVNode, createPortal, createRenderer, createTextVNode, createVNode, directClone, EMPTY_OBJ, getFlagsForElementVnode, linkEvent, normalizeProps, options, __render, findDOMfromVNode, Fragment, createFragment, createRef, forwardRef, rerender } from 'inferno';
+export { Component, EMPTY_OBJ, Fragment, _CI, _HI, _L, _M, _MCCC, _ME, _MFCC, _MP, _MR, _MT, __render, createComponentVNode, createFragment, createPortal, createRef, createRenderer, createTextVNode, createVNode, directClone, findDOMfromVNode, forwardRef, getFlagsForElementVnode, linkEvent, normalizeProps, options, rerender } from 'inferno';
 import { cloneVNode } from 'inferno-clone-vnode';
 export { cloneVNode as cloneElement, cloneVNode } from 'inferno-clone-vnode';
 import { createClass } from 'inferno-create-class';
@@ -10,7 +10,6 @@ import { findDOMNode } from 'inferno-extras';
 export { findDOMNode } from 'inferno-extras';
 
 var ERROR_MSG = 'a runtime error occured! Use Inferno in development environment to find the error.';
-var isBrowser = !!(typeof window !== 'undefined' && window.document);
 function isNullOrUndef(o) {
     return isUndefined(o) || isNull(o);
 }
@@ -225,7 +224,6 @@ function hydrate(input, parentDOM, callback) {
     }
 }
 
-var isBrowser$1 = !!(typeof window !== 'undefined' && window.document);
 var isArray = Array.isArray;
 function isNullOrUndef$1(o) {
     return isUndefined$1(o) || isNull$1(o);
@@ -681,25 +679,43 @@ function render(rootInput, container, cb, context) {
     }
 }
 // Mask React global in browser enviornments when React is not used.
-if (isBrowser$1 && typeof window.React === 'undefined') {
+if (typeof window !== 'undefined' && typeof window.React === 'undefined') {
     const exports = {
         Children,
         Component,
         EMPTY_OBJ,
+        Fragment,
         PropTypes,
         PureComponent,
+        // Internal methods
+        _CI,
+        _HI,
+        _L,
+        _M,
+        _MCCC,
+        _ME,
+        _MFCC,
+        _MP,
+        _MR,
+        _MT,
+        __render,
+        // Public methods
         cloneElement: cloneVNode,
         cloneVNode,
         createClass,
         createComponentVNode,
         createElement,
         createFactory,
+        createFragment,
         createPortal,
+        createRef,
         createRenderer,
         createTextVNode,
         createVNode,
         directClone,
         findDOMNode,
+        findDOMfromVNode,
+        forwardRef,
         getFlagsForElementVnode,
         hydrate,
         isValidElement,
@@ -707,6 +723,7 @@ if (isBrowser$1 && typeof window.React === 'undefined') {
         normalizeProps,
         options,
         render,
+        rerender,
         unmountComponentAtNode,
         unstable_renderSubtreeIntoContainer,
         version
@@ -718,21 +735,38 @@ var index = {
     Children,
     Component,
     EMPTY_OBJ,
+    Fragment,
     PropTypes,
     PureComponent,
+    // Internal methods
+    _CI,
+    _HI,
+    _L,
+    _M,
+    _MCCC,
+    _ME,
+    _MFCC,
+    _MP,
+    _MR,
+    _MT,
+    __render,
+    // Public methods
     cloneElement: cloneVNode,
     cloneVNode,
     createClass,
     createComponentVNode,
     createElement,
     createFactory,
+    createFragment,
     createPortal,
+    createRef,
     createRenderer,
     createTextVNode,
     createVNode,
     directClone,
     findDOMNode,
     findDOMfromVNode,
+    forwardRef,
     getFlagsForElementVnode,
     hydrate,
     isValidElement,
@@ -740,6 +774,7 @@ var index = {
     normalizeProps,
     options,
     render,
+    rerender,
     unmountComponentAtNode,
     unstable_renderSubtreeIntoContainer,
     version

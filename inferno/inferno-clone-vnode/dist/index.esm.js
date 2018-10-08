@@ -1,6 +1,5 @@
 import { createComponentVNode, createTextVNode, createVNode, directClone, EMPTY_OBJ, normalizeProps } from 'inferno';
 
-var isBrowser = !!(typeof window !== 'undefined' && window.document);
 var isArray = Array.isArray;
 function isStringOrNumber(o) {
     var type = typeof o;

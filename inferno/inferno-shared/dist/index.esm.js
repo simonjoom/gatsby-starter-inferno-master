@@ -1,5 +1,4 @@
 var ERROR_MSG = 'a runtime error occured! Use Inferno in development environment to find the error.';
-var isBrowser = !!(typeof window !== 'undefined' && window.document);
 var isArray = Array.isArray;
 function isStringOrNumber(o) {
     var type = typeof o;
@@ -57,4 +56,4 @@ function combineFrom(first, second) {
     return out;
 }
 
-export { ERROR_MSG, isBrowser, isArray, isStringOrNumber, isNullOrUndef, isInvalid, isFunction, isString, isNumber, isNull, isTrue, isUndefined, isObject, throwError, warning, combineFrom };
+export { ERROR_MSG, isArray, isStringOrNumber, isNullOrUndef, isInvalid, isFunction, isString, isNumber, isNull, isTrue, isUndefined, isObject, throwError, warning, combineFrom };

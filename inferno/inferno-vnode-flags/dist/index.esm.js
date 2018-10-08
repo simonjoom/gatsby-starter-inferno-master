@@ -19,13 +19,15 @@ var VNodeFlags;
     VNodeFlags[VNodeFlags["Fragment"] = 8192] = "Fragment";
     VNodeFlags[VNodeFlags["InUse"] = 16384] = "InUse";
     VNodeFlags[VNodeFlags["ForwardRef"] = 32768] = "ForwardRef";
+    VNodeFlags[VNodeFlags["Normalized"] = 65536] = "Normalized";
     /* Masks */
     VNodeFlags[VNodeFlags["ForwardRefComponent"] = 32776] = "ForwardRefComponent";
     VNodeFlags[VNodeFlags["FormElement"] = 448] = "FormElement";
     VNodeFlags[VNodeFlags["Element"] = 481] = "Element";
     VNodeFlags[VNodeFlags["Component"] = 14] = "Component";
     VNodeFlags[VNodeFlags["DOMRef"] = 2033] = "DOMRef";
-    VNodeFlags[VNodeFlags["ClearInUse"] = -16385] = "ClearInUse";
+    VNodeFlags[VNodeFlags["InUseOrNormalized"] = 81920] = "InUseOrNormalized";
+    VNodeFlags[VNodeFlags["ClearInUseNormalized"] = -81921] = "ClearInUseNormalized";
 })(VNodeFlags || (VNodeFlags = {}));
 // Combinations are not possible, its bitwise only to reduce vNode size
 var ChildFlags;

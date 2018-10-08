@@ -1,7 +1,6 @@
 import { Component } from 'inferno';
 
 var ERROR_MSG = 'a runtime error occured! Use Inferno in development environment to find the error.';
-var isBrowser = !!(typeof window !== 'undefined' && window.document);
 function isFunction(o) {
     return typeof o === 'function';
 }

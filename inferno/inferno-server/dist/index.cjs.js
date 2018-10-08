@@ -6,7 +6,6 @@ var inferno = require('inferno');
 var stream = require('stream');
 
 var ERROR_MSG = 'a runtime error occured! Use Inferno in development environment to find the error.';
-var isBrowser = !!(typeof window !== 'undefined' && window.document);
 function isStringOrNumber(o) {
     var type = typeof o;
     return type === 'string' || type === 'number';

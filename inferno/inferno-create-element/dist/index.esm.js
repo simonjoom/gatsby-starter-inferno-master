@@ -1,6 +1,5 @@
 import { createComponentVNode, createVNode, getFlagsForElementVnode, createFragment } from 'inferno';
 
-var isBrowser = !!(typeof window !== 'undefined' && window.document);
 function isNullOrUndef(o) {
     return isUndefined(o) || isNull(o);
 }

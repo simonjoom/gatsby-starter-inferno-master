@@ -4,7 +4,6 @@ Object.defineProperty(exports, '__esModule', { value: true });
 
 var inferno = require('inferno');
 
-var isBrowser = !!(typeof window !== 'undefined' && window.document);
 var isArray = Array.isArray;
 function isStringOrNumber(o) {
     var type = typeof o;

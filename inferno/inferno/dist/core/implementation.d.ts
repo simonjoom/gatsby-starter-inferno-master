@@ -11,9 +11,3 @@ export declare function createPortal(children: any, container: any): VNode;
 export declare function _normalizeVNodes(nodes: any[], result: VNode[], index: number, currentKey: string): void;
 export declare function getFlagsForElementVnode(type: string): VNodeFlags;
 export declare function normalizeChildren(vNode: VNode, children: any): VNode;
-export declare const options: {
-    componentComparator: null | Function;
-    createVNode: null | Function;
-    renderComplete: null | Function;
-    reactStyles?: boolean;
-};

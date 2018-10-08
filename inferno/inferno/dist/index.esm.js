@@ -1,4 +1,3 @@
-var isBrowser = !!(typeof window !== 'undefined' && window.document);
 var isArray = Array.isArray;
 function isStringOrNumber(o) {
     var type = typeof o;
@@ -155,26 +154,29 @@ function createDerivedState(instance, nextProps, state) {
     }
     return state;
 }
+var options = {
+    componentComparator: null,
+    createVNode: null,
+    renderComplete: null
+};
 
 var keyPrefix = '$';
-function getVNode(childFlags, children, className, flags, key, props, ref, type) {
-    return {
-        childFlags: childFlags,
-        children: children,
-        className: className,
-        dom: null,
-        flags: flags,
-        key: key === void 0 ? null : key,
-        props: props === void 0 ? null : props,
-        ref: ref === void 0 ? null : ref,
-        type: type
-    };
+function V(childFlags, children, className, flags, key, props, ref, type) {
+    this.childFlags = childFlags;
+    this.children = children;
+    this.className = className;
+    this.dom = null;
+    this.flags = flags;
+    this.key = key === void 0 ? null : key;
+    this.props = props === void 0 ? null : props;
+    this.ref = ref === void 0 ? null : ref;
+    this.type = type;
 }
 function createVNode(flags, type, className, children, childFlags, props, key, ref) {
     var childFlag = childFlags === void 0 ? 1 /* HasInvalidChildren */ : childFlags;
-    var vNode = getVNode(childFlag, children, className, flags, key, props, ref, type);
+    var vNode = new V(childFlag, children, className, flags, key, props, ref, type);
     var optsVNode = options.createVNode;
-    if (typeof optsVNode === 'function') {
+    if (isFunction(optsVNode)) {
         optsVNode(vNode);
     }
     if (childFlag === 0 /* UnknownChildren */) {
@@ -223,7 +225,7 @@ function createComponentVNode(flags, type, props, key, ref) {
             }
         }
     }
-    var vNode = getVNode(1 /* HasInvalidChildren */, null, null, flags, key, props, ref, type);
+    var vNode = new V(1 /* HasInvalidChildren */, null, null, flags, key, props, ref, type);
     var optsVNode = options.createVNode;
     if (isFunction(optsVNode)) {
         optsVNode(vNode);
@@ -231,7 +233,7 @@ function createComponentVNode(flags, type, props, key, ref) {
     return vNode;
 }
 function createTextVNode(text, key) {
-    return getVNode(1 /* HasInvalidChildren */, isNullOrUndef(text) ? '' : text, null, 16 /* Text */, key, null, null, null);
+    return new V(1 /* HasInvalidChildren */, isNullOrUndef(text) ? '' : text, null, 16 /* Text */, key, null, null, null);
 }
 function createFragment(children, childFlags, key) {
     var fragment = createVNode(8192 /* Fragment */, 8192 /* Fragment */, null, children, childFlags, null, key, null);
@@ -279,33 +281,21 @@ function normalizeProps(vNode) {
     return vNode;
 }
 function directClone(vNodeToClone) {
-    var newVNode;
-    var flags = vNodeToClone.flags;
-    flags &= -16385 /* ClearInUse */;
+    var flags = vNodeToClone.flags & -81921 /* ClearInUseNormalized */;
+    var props = vNodeToClone.props;
     if (flags & 14 /* Component */) {
-        var props;
-        var propsToClone = vNodeToClone.props;
-        if (!isNull(propsToClone)) {
+        if (!isNull(props)) {
+            var propsToClone = props;
             props = {};
             for (var key in propsToClone) {
                 props[key] = propsToClone[key];
             }
         }
-        newVNode = createComponentVNode(flags, vNodeToClone.type, props, vNodeToClone.key, vNodeToClone.ref);
     }
-    else if (flags & 481 /* Element */) {
-        newVNode = createVNode(flags, vNodeToClone.type, vNodeToClone.className, vNodeToClone.children, vNodeToClone.childFlags, vNodeToClone.props, vNodeToClone.key, vNodeToClone.ref);
+    if ((flags & 8192 /* Fragment */) === 0) {
+        return new V(vNodeToClone.childFlags, vNodeToClone.children, vNodeToClone.className, flags, vNodeToClone.key, props, vNodeToClone.ref, vNodeToClone.type);
     }
-    else if (flags & 16 /* Text */) {
-        newVNode = createTextVNode(vNodeToClone.children, vNodeToClone.key);
-    }
-    else if (flags & 1024 /* Portal */) {
-        newVNode = createPortal(vNodeToClone.children, vNodeToClone.ref);
-    }
-    else if (flags & 8192 /* Fragment */) {
-        newVNode = createFragment(vNodeToClone.children, 0 /* UnknownChildren */, vNodeToClone.key);
-    }
-    return newVNode;
+    return createFragment(vNodeToClone.children, 0 /* UnknownChildren */, vNodeToClone.key);
 }
 function createVoidVNode() {
     return createTextVNode('', null);
@@ -328,9 +318,10 @@ function _normalizeVNodes(nodes, result, index, currentKey) {
                 else {
                     var oldKey = n.key;
                     var isPrefixedKey = isString(oldKey) && oldKey[0] === keyPrefix;
-                    if (n.flags & 16384 /* InUse */ || isPrefixedKey) {
+                    if (n.flags & 81920 /* InUseOrNormalized */ || isPrefixedKey) {
                         n = directClone(n);
                     }
+                    n.flags |= 65536 /* Normalized */;
                     if (isNull(oldKey) || isPrefixedKey) {
                         n.key = newKey;
                     }
@@ -385,7 +376,7 @@ function normalizeChildren(vNode, children) {
             }
             else {
                 var key = n.key;
-                var needsCloning = (n.flags & 16384 /* InUse */) > 0;
+                var needsCloning = (n.flags & 81920 /* InUseOrNormalized */) > 0;
                 var isNullKey = isNull(key);
                 var isPrefixed = !isNullKey && isString(key) && key[0] === keyPrefix;
                 if (needsCloning || isNullKey || isPrefixed) {
@@ -401,17 +392,10 @@ function normalizeChildren(vNode, children) {
                 else if (newChildren) {
                     newChildren.push(n);
                 }
+                n.flags |= 65536 /* Normalized */;
             }
         }
-        // we assign $ which basically means we've flagged this array for future note
-        // if it comes back again, we need to clone it, as people are using it
-        // in an immutable way
-        // tslint:disable-next-line
-        if (!newChildren && (Object.isFrozen(children) || children['$'] === true)) {
-            newChildren = children.slice();
-        }
         newChildren = newChildren || children;
-        newChildren.$ = true;
         if (newChildren.length === 0) {
             newChildFlags = 1 /* HasInvalidChildren */;
         }
@@ -421,7 +405,8 @@ function normalizeChildren(vNode, children) {
     }
     else {
         newChildren = children;
-        if (children.flags & 16384 /* InUse */) {
+        newChildren.flags |= 65536 /* Normalized */;
+        if (children.flags & 81920 /* InUseOrNormalized */) {
             newChildren = directClone(children);
         }
         newChildFlags = 2 /* HasVNodeChildren */;
@@ -430,11 +415,6 @@ function normalizeChildren(vNode, children) {
     vNode.childFlags = newChildFlags;
     return vNode;
 }
-var options = {
-    componentComparator: null,
-    createVNode: null,
-    renderComplete: null
-};
 
 /**
  * Links given data to event as first parameter
@@ -872,29 +852,29 @@ function unmount(vNode) {
             unmount(children);
         }
     }
-    else if (flags & 4 /* ComponentClass */) {
-        if (isFunction(children.componentWillUnmount)) {
-            children.componentWillUnmount();
+    else if (children) {
+        if (flags & 4 /* ComponentClass */) {
+            if (isFunction(children.componentWillUnmount)) {
+                children.componentWillUnmount();
+            }
+            unmountRef(vNode.ref);
+            children.$UN = true;
+            unmount(children.$LI);
         }
-        unmountRef(vNode.ref);
-        children.$UN = true;
-        unmount(children.$LI);
-    }
-    else if (flags & 8 /* ComponentFunction */) {
-        ref = vNode.ref;
-        if (!isNullOrUndef(ref) && isFunction(ref.onComponentWillUnmount)) {
-            ref.onComponentWillUnmount(findDOMfromVNode(vNode), vNode.props || EMPTY_OBJ);
+        else if (flags & 8 /* ComponentFunction */) {
+            ref = vNode.ref;
+            if (!isNullOrUndef(ref) && isFunction(ref.onComponentWillUnmount)) {
+                ref.onComponentWillUnmount(findDOMfromVNode(vNode), vNode.props || EMPTY_OBJ);
+            }
+            unmount(children);
         }
-        unmount(children);
-    }
-    else if (flags & 1024 /* Portal */) {
-        if (children) {
+        else if (flags & 1024 /* Portal */) {
             remove(children, vNode.ref);
         }
-    }
-    else if (flags & 8192 /* Fragment */) {
-        if (vNode.childFlags & 12 /* MultipleChildren */) {
-            unmountAllChildren(children);
+        else if (flags & 8192 /* Fragment */) {
+            if (vNode.childFlags & 12 /* MultipleChildren */) {
+                unmountAllChildren(children);
+            }
         }
     }
 }
@@ -1092,6 +1072,15 @@ function mountProps(vNode, flags, props, dom, isSVG) {
     }
 }
 
+function renderNewInput(instance, props, context) {
+    var nextInput = handleComponentInput(instance.render(props, instance.state, context));
+    var childContext = context;
+    if (isFunction(instance.getChildContext)) {
+        childContext = combineFrom(context, instance.getChildContext());
+    }
+    instance.$CX = childContext;
+    return nextInput;
+}
 function createClassComponentInstance(vNode, Component, props, context) {
     var instance = new Component(props, context);
     var usesNewAPI = (instance.$N = Boolean(Component.getDerivedStateFromProps || instance.getSnapshotBeforeUpdate));
@@ -1125,18 +1114,7 @@ function createClassComponentInstance(vNode, Component, props, context) {
     else {
         instance.state = createDerivedState(instance, props, instance.state);
     }
-    var input = handleComponentInput(instance.render(props, instance.state, context));
-    var childContext;
-    if (isFunction(instance.getChildContext)) {
-        childContext = instance.getChildContext();
-    }
-    if (isNullOrUndef(childContext)) {
-        instance.$CX = context;
-    }
-    else {
-        instance.$CX = combineFrom(context, childContext);
-    }
-    instance.$LI = input;
+    instance.$LI = renderNewInput(instance, props, context);
     return instance;
 }
 function handleComponentInput(input) {
@@ -1149,10 +1127,8 @@ function handleComponentInput(input) {
     else if (isArray(input)) {
         input = createFragment(input, 0 /* UnknownChildren */, null);
     }
-    else {
-        if (input.flags & 16384 /* InUse */) {
-            input = directClone(input);
-        }
+    else if (input.flags & 16384 /* InUse */) {
+        input = directClone(input);
     }
     return input;
 }
@@ -1204,10 +1180,10 @@ function mountTextContent(dom, children) {
 }
 function mountElement(vNode, parentDOM, context, isSVG, nextNode) {
     var flags = vNode.flags;
-    var children = vNode.children;
     var props = vNode.props;
     var className = vNode.className;
     var ref = vNode.ref;
+    var children = vNode.children;
     var childFlags = vNode.childFlags;
     isSVG = isSVG || (flags & 32 /* SvgElement */) > 0;
     var dom = documentCreateElement(vNode.type, isSVG);
@@ -1226,6 +1202,9 @@ function mountElement(vNode, parentDOM, context, isSVG, nextNode) {
     else if (childFlags !== 1 /* HasInvalidChildren */) {
         var childrenIsSVG = isSVG && vNode.type !== 'foreignObject';
         if (childFlags === 2 /* HasVNodeChildren */) {
+            if (children.flags & 16384 /* InUse */) {
+                vNode.children = children = directClone(children);
+            }
             mount(children, dom, context, childrenIsSVG, null);
         }
         else if (childFlags === 8 /* HasKeyedChildren */ || childFlags === 4 /* HasNonKeyedChildren */) {
@@ -1306,7 +1285,7 @@ function replaceWithNewNode(lastVNode, nextVNode, parentDOM, context, isSVG) {
 }
 function patch(lastVNode, nextVNode, parentDOM, context, isSVG, nextNode) {
     var nextFlags = (nextVNode.flags |= 16384 /* InUse */);
-    if (lastVNode.flags !== nextFlags || lastVNode.type !== nextVNode.type || lastVNode.key !== nextVNode.key || (nextFlags & 2048 /* ReCreate */) > 0) {
+    if (lastVNode.flags !== nextFlags || lastVNode.type !== nextVNode.type || lastVNode.key !== nextVNode.key || (nextFlags & 2048 /* ReCreate */) !== 0) {
         if (lastVNode.flags & 16384 /* InUse */) {
             replaceWithNewNode(lastVNode, nextVNode, parentDOM, context, isSVG);
         }
@@ -1537,7 +1516,7 @@ function createDidUpdate(instance, lastProps, lastState, snapshot) {
 function updateClassComponent(instance, nextState, nextProps, parentDOM, context, isSVG, force, nextNode) {
     var lastState = instance.state;
     var lastProps = instance.props;
-    var usesNewAPI = instance.$N;
+    var usesNewAPI = Boolean(instance.$N);
     var hasSCU = isFunction(instance.shouldComponentUpdate);
     if (usesNewAPI) {
         nextState = createDerivedState(instance, nextProps, nextState !== lastState ? combineFrom(lastState, nextState) : nextState);
@@ -1549,24 +1528,12 @@ function updateClassComponent(instance, nextState, nextProps, parentDOM, context
         instance.props = nextProps;
         instance.state = nextState;
         instance.context = context;
-        var renderOutput = instance.render(nextProps, nextState, context);
         var snapshot = null;
+        var nextInput = renderNewInput(instance, nextProps, context);
         if (usesNewAPI && isFunction(instance.getSnapshotBeforeUpdate)) {
             snapshot = instance.getSnapshotBeforeUpdate(lastProps, lastState);
         }
-        var childContext;
-        if (isFunction(instance.getChildContext)) {
-            childContext = instance.getChildContext();
-        }
-        if (isNullOrUndef(childContext)) {
-            childContext = context;
-        }
-        else {
-            childContext = combineFrom(context, childContext);
-        }
-        instance.$CX = childContext;
-        var nextInput = handleComponentInput(renderOutput);
-        patch(instance.$LI, nextInput, parentDOM, childContext, isSVG, nextNode);
+        patch(instance.$LI, nextInput, parentDOM, instance.$CX, isSVG, nextNode);
         // Dont update Last input, until patch has been succesfully executed
         instance.$LI = nextInput;
         if (isFunction(instance.componentDidUpdate)) {
@@ -1580,9 +1547,13 @@ function updateClassComponent(instance, nextState, nextProps, parentDOM, context
     }
 }
 function patchClassComponent(lastVNode, nextVNode, parentDOM, context, isSVG, nextNode) {
+    var instance = (nextVNode.children = lastVNode.children);
+    // If Component has crashed, ignore it to stay functional
+    if (isNull(instance)) {
+        return;
+    }
     var nextProps = nextVNode.props || EMPTY_OBJ;
     var nextRef = nextVNode.ref;
-    var instance = (nextVNode.children = lastVNode.children);
     var lastRef = lastVNode.ref;
     var nextState = instance.state;
     instance.$UPD = true;
@@ -1674,7 +1645,7 @@ function patchNonKeyedChildren(lastChildren, nextChildren, dom, context, isSVG, 
 function patchKeyedChildren(a, b, dom, context, isSVG, aLength, bLength, outerEdge, parentVNode) {
     var aEnd = aLength - 1;
     var bEnd = bLength - 1;
-    var i;
+    var i = 0;
     var j = 0;
     var aNode = a[j];
     var bNode = b[j];
@@ -1740,7 +1711,7 @@ function patchKeyedChildren(a, b, dom, context, isSVG, aLength, bLength, outerEd
         var aLeft = aEnd - j + 1;
         var bLeft = bEnd - j + 1;
         var sources = [];
-        for (i = 0; i < bLeft; i++) {
+        while (i++ <= bLeft) {
             sources.push(0);
         }
         // Keep track if its possible to remove whole DOM using textContent = '';
@@ -1759,7 +1730,7 @@ function patchKeyedChildren(a, b, dom, context, isSVG, aLength, bLength, outerEd
                             sources[j - bStart] = i + 1;
                             if (canRemoveWholeContent) {
                                 canRemoveWholeContent = false;
-                                while (i > aStart) {
+                                while (aStart < i) {
                                     remove(a[aStart++], dom);
                                 }
                             }
@@ -1832,45 +1803,42 @@ function patchKeyedChildren(a, b, dom, context, isSVG, aLength, bLength, outerEd
             removeAllChildren(dom, parentVNode, a);
             mountArrayChildren(b, dom, context, isSVG, outerEdge);
         }
-        else {
-            if (moved) {
-                var seq = lis_algorithm(sources);
-                j = seq.length - 1;
-                for (i = bLeft - 1; i >= 0; i--) {
-                    if (sources[i] === 0) {
-                        pos = i + bStart;
-                        bNode = b[pos];
-                        if (bNode.flags & 16384 /* InUse */) {
-                            b[pos] = bNode = directClone(bNode);
-                        }
-                        nextPos = pos + 1;
-                        mount(bNode, dom, context, isSVG, nextPos < bLength ? findDOMfromVNode(b[nextPos]) : outerEdge);
+        else if (moved) {
+            var seq = lis_algorithm(sources);
+            j = seq.length - 1;
+            for (i = bLeft - 1; i >= 0; i--) {
+                if (sources[i] === 0) {
+                    pos = i + bStart;
+                    bNode = b[pos];
+                    if (bNode.flags & 16384 /* InUse */) {
+                        b[pos] = bNode = directClone(bNode);
                     }
-                    else if (j < 0 || i !== seq[j]) {
-                        pos = i + bStart;
-                        bNode = b[pos];
-                        nextPos = pos + 1;
-                        nextNode = nextPos < bLength ? findDOMfromVNode(b[nextPos]) : outerEdge;
-                        moveVNodeDOM(bNode, dom, nextNode);
-                    }
-                    else {
-                        j--;
-                    }
+                    nextPos = pos + 1;
+                    mount(bNode, dom, context, isSVG, nextPos < bLength ? findDOMfromVNode(b[nextPos]) : outerEdge);
+                }
+                else if (j < 0 || i !== seq[j]) {
+                    pos = i + bStart;
+                    bNode = b[pos];
+                    nextPos = pos + 1;
+                    moveVNodeDOM(bNode, dom, nextPos < bLength ? findDOMfromVNode(b[nextPos]) : outerEdge);
+                }
+                else {
+                    j--;
                 }
             }
-            else if (patched !== bLeft) {
-                // when patched count doesn't match b length we need to insert those new ones
-                // loop backwards so we can use insertBefore
-                for (i = bLeft - 1; i >= 0; i--) {
-                    if (sources[i] === 0) {
-                        pos = i + bStart;
-                        bNode = b[pos];
-                        if (bNode.flags & 16384 /* InUse */) {
-                            b[pos] = bNode = directClone(bNode);
-                        }
-                        nextPos = pos + 1;
-                        mount(bNode, dom, context, isSVG, nextPos < bLength ? findDOMfromVNode(b[nextPos]) : outerEdge);
+        }
+        else if (patched !== bLeft) {
+            // when patched count doesn't match b length we need to insert those new ones
+            // loop backwards so we can use insertBefore
+            for (i = bLeft - 1; i >= 0; i--) {
+                if (sources[i] === 0) {
+                    pos = i + bStart;
+                    bNode = b[pos];
+                    if (bNode.flags & 16384 /* InUse */) {
+                        b[pos] = bNode = directClone(bNode);
                     }
+                    nextPos = pos + 1;
+                    mount(bNode, dom, context, isSVG, nextPos < bLength ? findDOMfromVNode(b[nextPos]) : outerEdge);
                 }
             }
         }
@@ -1923,6 +1891,7 @@ function lis_algorithm(arr) {
     return result;
 }
 
+var isBrowser = typeof window !== 'undefined';
 var documentBody = isBrowser ? document.body : null;
 function __render(input, parentDOM, callback, context) {
     var rootInput = parentDOM.$V;
@@ -2092,9 +2061,9 @@ Component.prototype.setState = function setState (newState, callback) {
     }
 };
 Component.prototype.render = function render (_nextProps, _nextState, _nextContext) {
-    return;
+    return null;
 };
 
-var version = "6.0.0-rc.1";
+var version = "6.0.0-rc.3";
 
 export { Component, Fragment, EMPTY_OBJ, createComponentVNode, createFragment, createPortal, createRef, createRenderer, createTextVNode, createVNode, forwardRef, directClone, findDOMfromVNode, getFlagsForElementVnode, linkEvent, normalizeProps, options, render, rerender, version, LIFECYCLE as _L, createClassComponentInstance as _CI, handleComponentInput as _HI, mount as _M, mountClassComponentCallbacks as _MCCC, mountElement as _ME, mountFunctionalComponentCallbacks as _MFCC, mountRef as _MR, mountText as _MT, mountProps as _MP, __render };

@@ -5,7 +5,6 @@
 }(this, (function (exports) { 'use strict';
 
   var ERROR_MSG = 'a runtime error occured! Use Inferno in development environment to find the error.';
-  var isBrowser = !!(typeof window !== 'undefined' && window.document);
   var isArray = Array.isArray;
   function isStringOrNumber(o) {
       var type = typeof o;
@@ -64,7 +63,6 @@
   }
 
   exports.ERROR_MSG = ERROR_MSG;
-  exports.isBrowser = isBrowser;
   exports.isArray = isArray;
   exports.isStringOrNumber = isStringOrNumber;
   exports.isNullOrUndef = isNullOrUndef;

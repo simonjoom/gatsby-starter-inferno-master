@@ -5,6 +5,7 @@
   "author": "Simon Gendrin <simon@skiscool.com>",
   "dependencies": {
     "gatsby": "file:gatsbyhack/gatsby",
+    "inferno": "^6.0.0-rc.3",
     "gatsby-plugin-manifest": "^2.0.2",
     "gatsby-plugin-offline": "^2.0.5",
     "gatsby-plugin-react-helmet": "^3.0.0",

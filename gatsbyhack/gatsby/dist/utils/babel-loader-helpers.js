@@ -32,6 +32,13 @@ const prepareOptions = (babel, resolve = require.resolve) => {
   const requiredPlugins = [babel.createConfigItem([resolve(`babel-plugin-remove-graphql-queries`)], {
     type: `plugin`
   })];
+  
+if (stage !== `develop`&&process.env.NODE_ENV === `inferno`) {
+requiredPlugins.unshift(babel.createConfigItem([resolve(`babel-plugin-inferno`),{import:true}], {
+    type: `plugin`
+  }));
+    }
+    
   const requiredPresets = []; // Stage specific plugins to add
 
   if (stage === `build-html` || stage === `develop-html`) {

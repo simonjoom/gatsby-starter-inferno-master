@@ -1,6 +1,6 @@
-import { combineFrom, isFunction, isInvalid, isNullOrUndef } from 'inferno-shared';
+import { combineFrom, isFunction, isInvalid, isNull, isNullOrUndef } from 'inferno-shared';
 import { ChildFlags, VNodeFlags } from 'inferno-vnode-flags';
-import { directClone, options } from '../core/implementation';
+import { directClone } from '../core/implementation';
 import { VNode } from '../core/types';
 import { mount, mountArrayChildren, mountTextContent } from './mounting';
 import { clearDOM, remove, removeAllChildren, unmount, unmountAllChildren } from './unmounting';
@@ -11,13 +11,14 @@ import {
   findDOMfromVNode,
   LIFECYCLE,
   moveVNodeDOM,
+  options,
   removeChild,
   removeVNodeDOM,
   replaceChild
 } from './utils/common';
 import { isControlledFormElement, processElement } from './wrappers/processElement';
 import { patchProp } from './props';
-import { handleComponentInput } from './utils/componentutil';
+import { handleComponentInput, renderNewInput } from './utils/componentutil';
 import { validateKeys } from '../core/validate';
 import { mountRef, unmountRef } from '../core/refs';
 
@@ -40,14 +41,14 @@ export function patch(lastVNode: VNode, nextVNode: VNode, parentDOM: Element, co
 
   if (process.env.NODE_ENV !== 'production') {
     if (isFunction(options.componentComparator) && lastVNode.flags & nextFlags & VNodeFlags.ComponentClass) {
-      if (options.componentComparator(lastVNode, nextVNode) === false) {
+      if ((options.componentComparator as Function)(lastVNode, nextVNode) === false) {
         patchClassComponent(lastVNode, nextVNode, parentDOM, context, isSVG, nextNode);
         return;
       }
     }
   }
 
-  if (lastVNode.flags !== nextFlags || lastVNode.type !== nextVNode.type || lastVNode.key !== nextVNode.key || (nextFlags & VNodeFlags.ReCreate) > 0) {
+  if (lastVNode.flags !== nextFlags || lastVNode.type !== nextVNode.type || lastVNode.key !== nextVNode.key || (nextFlags & VNodeFlags.ReCreate) !== 0) {
     if (lastVNode.flags & VNodeFlags.InUse) {
       replaceWithNewNode(lastVNode, nextVNode, parentDOM, context, isSVG);
     } else {
@@ -322,7 +323,7 @@ function createDidUpdate(instance, lastProps, lastState, snapshot) {
 export function updateClassComponent(instance, nextState, nextProps, parentDOM: Element, context, isSVG: boolean, force: boolean, nextNode: Element | null) {
   const lastState = instance.state;
   const lastProps = instance.props;
-  const usesNewAPI = instance.$N;
+  const usesNewAPI = Boolean(instance.$N);
   const hasSCU = isFunction(instance.shouldComponentUpdate);
 
   if (usesNewAPI) {
@@ -337,27 +338,14 @@ export function updateClassComponent(instance, nextState, nextProps, parentDOM: 
     instance.props = nextProps;
     instance.state = nextState;
     instance.context = context;
-
-    const renderOutput = instance.render(nextProps, nextState, context);
     let snapshot = null;
+    const nextInput = renderNewInput(instance, nextProps, context);
 
     if (usesNewAPI && isFunction(instance.getSnapshotBeforeUpdate)) {
       snapshot = instance.getSnapshotBeforeUpdate(lastProps, lastState);
     }
 
-    let childContext;
-    if (isFunction(instance.getChildContext)) {
-      childContext = instance.getChildContext();
-    }
-    if (isNullOrUndef(childContext)) {
-      childContext = context;
-    } else {
-      childContext = combineFrom(context, childContext);
-    }
-    instance.$CX = childContext;
-    const nextInput = handleComponentInput(renderOutput);
-
-    patch(instance.$LI, nextInput, parentDOM, childContext, isSVG, nextNode);
+    patch(instance.$LI, nextInput, parentDOM, instance.$CX, isSVG, nextNode);
 
     // Dont update Last input, until patch has been succesfully executed
     instance.$LI = nextInput;
@@ -373,9 +361,14 @@ export function updateClassComponent(instance, nextState, nextProps, parentDOM: 
 }
 
 function patchClassComponent(lastVNode, nextVNode, parentDOM, context, isSVG: boolean, nextNode: Element | null) {
+  const instance = (nextVNode.children = lastVNode.children);
+  // If Component has crashed, ignore it to stay functional
+  if (isNull(instance)) {
+    return;
+  }
+
   const nextProps = nextVNode.props || EMPTY_OBJ;
   const nextRef = nextVNode.ref;
-  const instance = (nextVNode.children = lastVNode.children);
   const lastRef = lastVNode.ref;
   let nextState = instance.state;
 
@@ -502,7 +495,7 @@ function patchKeyedChildren(
 ) {
   let aEnd = aLength - 1;
   let bEnd = bLength - 1;
-  let i: number;
+  let i: number = 0;
   let j: number = 0;
   let aNode: VNode = a[j];
   let bNode: VNode = b[j];
@@ -566,12 +559,12 @@ function patchKeyedChildren(
       remove(a[j++], dom);
     }
   } else {
-    let aStart = j;
-    const bStart = j;
+    let aStart: number = j;
+    const bStart: number = j;
     const aLeft: number = aEnd - j + 1;
     const bLeft: number = bEnd - j + 1;
     const sources: number[] = [];
-    for (i = 0; i < bLeft; i++) {
+    while (i++ <= bLeft) {
       sources.push(0);
     }
     // Keep track if its possible to remove whole DOM using textContent = '';
@@ -591,7 +584,7 @@ function patchKeyedChildren(
               sources[j - bStart] = i + 1;
               if (canRemoveWholeContent) {
                 canRemoveWholeContent = false;
-                while (i > aStart) {
+                while (aStart < i) {
                   remove(a[aStart++], dom);
                 }
               }
@@ -661,43 +654,40 @@ function patchKeyedChildren(
     if (canRemoveWholeContent) {
       removeAllChildren(dom, parentVNode, a);
       mountArrayChildren(b, dom, context, isSVG, outerEdge);
-    } else {
-      if (moved) {
-        const seq = lis_algorithm(sources);
-        j = seq.length - 1;
-        for (i = bLeft - 1; i >= 0; i--) {
-          if (sources[i] === 0) {
-            pos = i + bStart;
-            bNode = b[pos];
-            if (bNode.flags & VNodeFlags.InUse) {
-              b[pos] = bNode = directClone(bNode);
-            }
-            nextPos = pos + 1;
-            mount(bNode, dom, context, isSVG, nextPos < bLength ? findDOMfromVNode(b[nextPos]) : outerEdge);
-          } else if (j < 0 || i !== seq[j]) {
-            pos = i + bStart;
-            bNode = b[pos];
-            nextPos = pos + 1;
-            nextNode = nextPos < bLength ? findDOMfromVNode(b[nextPos]) : outerEdge;
+    } else if (moved) {
+      const seq = lis_algorithm(sources);
+      j = seq.length - 1;
+      for (i = bLeft - 1; i >= 0; i--) {
+        if (sources[i] === 0) {
+          pos = i + bStart;
+          bNode = b[pos];
+          if (bNode.flags & VNodeFlags.InUse) {
+            b[pos] = bNode = directClone(bNode);
+          }
+          nextPos = pos + 1;
+          mount(bNode, dom, context, isSVG, nextPos < bLength ? findDOMfromVNode(b[nextPos]) : outerEdge);
+        } else if (j < 0 || i !== seq[j]) {
+          pos = i + bStart;
+          bNode = b[pos];
+          nextPos = pos + 1;
 
-            moveVNodeDOM(bNode, dom, nextNode);
-          } else {
-            j--;
-          }
+          moveVNodeDOM(bNode, dom, nextPos < bLength ? findDOMfromVNode(b[nextPos]) : outerEdge);
+        } else {
+          j--;
         }
-      } else if (patched !== bLeft) {
-        // when patched count doesn't match b length we need to insert those new ones
-        // loop backwards so we can use insertBefore
-        for (i = bLeft - 1; i >= 0; i--) {
-          if (sources[i] === 0) {
-            pos = i + bStart;
-            bNode = b[pos];
-            if (bNode.flags & VNodeFlags.InUse) {
-              b[pos] = bNode = directClone(bNode);
-            }
-            nextPos = pos + 1;
-            mount(bNode, dom, context, isSVG, nextPos < bLength ? findDOMfromVNode(b[nextPos]) : outerEdge);
+      }
+    } else if (patched !== bLeft) {
+      // when patched count doesn't match b length we need to insert those new ones
+      // loop backwards so we can use insertBefore
+      for (i = bLeft - 1; i >= 0; i--) {
+        if (sources[i] === 0) {
+          pos = i + bStart;
+          bNode = b[pos];
+          if (bNode.flags & VNodeFlags.InUse) {
+            b[pos] = bNode = directClone(bNode);
           }
+          nextPos = pos + 1;
+          mount(bNode, dom, context, isSVG, nextPos < bLength ? findDOMfromVNode(b[nextPos]) : outerEdge);
         }
       }
     }

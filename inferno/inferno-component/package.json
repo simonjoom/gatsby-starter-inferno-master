@@ -1,6 +1,6 @@
 {
   "name": "inferno-component",
-  "version": "6.0.0-rc.1",
+  "version": "6.0.0-rc.3",
   "license": "MIT",
   "description": "Inferno ES6 Component",
   "author": {
@@ -22,5 +22,8 @@
   "module": "dist/index.esm.js",
   "dev:module": "dist/index.dev.esm.js",
   "typings": "dist/index.d.ts",
-  "repository": "https://github.com/infernojs/inferno"
+  "repository": "https://github.com/infernojs/inferno",
+  "dependencies": {
+    "inferno": "^6.0.0-rc.3"
+  }
 }

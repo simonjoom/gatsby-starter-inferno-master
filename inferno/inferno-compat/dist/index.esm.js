@@ -1,5 +1,5 @@
-import { _CI, _HI, _L, _MT, _M, _MCCC, _ME, _MFCC, _MR, _MP, Component, createComponentVNode, createPortal, createRenderer, createTextVNode, createVNode, directClone, EMPTY_OBJ, getFlagsForElementVnode, linkEvent, normalizeProps, options, __render, findDOMfromVNode } from 'inferno';
-export { Component, EMPTY_OBJ, createComponentVNode, createPortal, createRenderer, createTextVNode, createVNode, directClone, getFlagsForElementVnode, linkEvent, normalizeProps, options } from 'inferno';
+import { _CI, _HI, _L, _MT, _M, _MCCC, _ME, _MFCC, _MR, _MP, Component, createComponentVNode, createPortal, createRenderer, createTextVNode, createVNode, directClone, EMPTY_OBJ, getFlagsForElementVnode, linkEvent, normalizeProps, options, __render, findDOMfromVNode, Fragment, createFragment, createRef, forwardRef, rerender } from 'inferno';
+export { Component, EMPTY_OBJ, Fragment, _CI, _HI, _L, _M, _MCCC, _ME, _MFCC, _MP, _MR, _MT, __render, createComponentVNode, createFragment, createPortal, createRef, createRenderer, createTextVNode, createVNode, directClone, findDOMfromVNode, forwardRef, getFlagsForElementVnode, linkEvent, normalizeProps, options, rerender } from 'inferno';
 import { cloneVNode } from 'inferno-clone-vnode';
 export { cloneVNode as cloneElement, cloneVNode } from 'inferno-clone-vnode';
 import { createClass } from 'inferno-create-class';
@@ -10,7 +10,6 @@ import { findDOMNode } from 'inferno-extras';
 export { findDOMNode } from 'inferno-extras';
 
 var ERROR_MSG = 'a runtime error occured! Use Inferno in development environment to find the error.';
-var isBrowser = !!(typeof window !== 'undefined' && window.document);
 function isNullOrUndef(o) {
     return isUndefined(o) || isNull(o);
 }
@@ -225,7 +224,6 @@ function hydrate(input, parentDOM, callback) {
     }
 }
 
-var isBrowser$1 = !!(typeof window !== 'undefined' && window.document);
 var isArray = Array.isArray;
 function isNullOrUndef$1(o) {
     return isUndefined$1(o) || isNull$1(o);
@@ -701,25 +699,43 @@ function render(rootInput, container, cb, context) {
     }
 }
 // Mask React global in browser enviornments when React is not used.
-if (isBrowser$1 && typeof window.React === 'undefined') {
+if (typeof window !== 'undefined' && typeof window.React === 'undefined') {
     var exports$1 = {
         Children: Children,
         Component: Component,
         EMPTY_OBJ: EMPTY_OBJ,
+        Fragment: Fragment,
         PropTypes: PropTypes,
         PureComponent: PureComponent,
+        // Internal methods
+        _CI: _CI,
+        _HI: _HI,
+        _L: _L,
+        _M: _M,
+        _MCCC: _MCCC,
+        _ME: _ME,
+        _MFCC: _MFCC,
+        _MP: _MP,
+        _MR: _MR,
+        _MT: _MT,
+        __render: __render,
+        // Public methods
         cloneElement: cloneVNode,
         cloneVNode: cloneVNode,
         createClass: createClass,
         createComponentVNode: createComponentVNode,
         createElement: createElement,
         createFactory: createFactory,
+        createFragment: createFragment,
         createPortal: createPortal,
+        createRef: createRef,
         createRenderer: createRenderer,
         createTextVNode: createTextVNode,
         createVNode: createVNode,
         directClone: directClone,
         findDOMNode: findDOMNode,
+        findDOMfromVNode: findDOMfromVNode,
+        forwardRef: forwardRef,
         getFlagsForElementVnode: getFlagsForElementVnode,
         hydrate: hydrate,
         isValidElement: isValidElement,
@@ -727,6 +743,7 @@ if (isBrowser$1 && typeof window.React === 'undefined') {
         normalizeProps: normalizeProps,
         options: options,
         render: render,
+        rerender: rerender,
         unmountComponentAtNode: unmountComponentAtNode,
         unstable_renderSubtreeIntoContainer: unstable_renderSubtreeIntoContainer,
         version: version
@@ -738,21 +755,38 @@ var index = {
     Children: Children,
     Component: Component,
     EMPTY_OBJ: EMPTY_OBJ,
+    Fragment: Fragment,
     PropTypes: PropTypes,
     PureComponent: PureComponent,
+    // Internal methods
+    _CI: _CI,
+    _HI: _HI,
+    _L: _L,
+    _M: _M,
+    _MCCC: _MCCC,
+    _ME: _ME,
+    _MFCC: _MFCC,
+    _MP: _MP,
+    _MR: _MR,
+    _MT: _MT,
+    __render: __render,
+    // Public methods
     cloneElement: cloneVNode,
     cloneVNode: cloneVNode,
     createClass: createClass,
     createComponentVNode: createComponentVNode,
     createElement: createElement,
     createFactory: createFactory,
+    createFragment: createFragment,
     createPortal: createPortal,
+    createRef: createRef,
     createRenderer: createRenderer,
     createTextVNode: createTextVNode,
     createVNode: createVNode,
     directClone: directClone,
     findDOMNode: findDOMNode,
     findDOMfromVNode: findDOMfromVNode,
+    forwardRef: forwardRef,
     getFlagsForElementVnode: getFlagsForElementVnode,
     hydrate: hydrate,
     isValidElement: isValidElement,
@@ -760,6 +794,7 @@ var index = {
     normalizeProps: normalizeProps,
     options: options,
     render: render,
+    rerender: rerender,
     unmountComponentAtNode: unmountComponentAtNode,
     unstable_renderSubtreeIntoContainer: unstable_renderSubtreeIntoContainer,
     version: version

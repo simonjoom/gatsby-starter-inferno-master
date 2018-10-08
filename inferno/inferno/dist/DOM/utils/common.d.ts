@@ -1,4 +1,4 @@
-import { VNode } from './../../core/types';
+import { InfernoNode, VNode } from './../../core/types';
 export declare const EMPTY_OBJ: {};
 export declare const Fragment: string;
 export declare const LIFECYCLE: Function[];
@@ -13,3 +13,9 @@ export declare function removeVNodeDOM(vNode: VNode, parentDOM: Element): void;
 export declare function moveVNodeDOM(vNode: any, parentDOM: any, nextNode: any): void;
 export declare function getComponentName(instance: any): string;
 export declare function createDerivedState(instance: any, nextProps: any, state: any): any;
+export declare const options: {
+    componentComparator: ((lastVNode: VNode, nextVNode: VNode) => boolean) | null;
+    createVNode: ((vNode: VNode) => void) | null;
+    renderComplete: ((rootInput: VNode | InfernoNode, parentDOM: Element | SVGAElement | ShadowRoot | DocumentFragment | HTMLElement | Node) => void) | null;
+    reactStyles?: boolean;
+};

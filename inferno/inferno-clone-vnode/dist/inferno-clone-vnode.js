@@ -4,7 +4,6 @@
     (factory((global.Inferno = global.Inferno || {}),global.Inferno));
 }(this, (function (exports,inferno) { 'use strict';
 
-    var isBrowser = !!(typeof window !== 'undefined' && window.document);
     var isArray = Array.isArray;
     function isStringOrNumber(o) {
         var type = typeof o;
