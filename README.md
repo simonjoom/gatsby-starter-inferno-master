@@ -7,9 +7,10 @@
   Gatsby's inferno starter
 </h1>
 
-<h2 align="left">
-The hack:
-Used the last still not published inferno-v6.rc2
+<h3 align="left">
+The hack: 
+Inferno v6 stable just released!
+
 
 In cache-dir/gatsby-browser-entry force gatsby to use the polyfill create-react-context
 
@@ -34,7 +35,7 @@ In dist/bootstrap.js
 
     same turn around hot-reload for inferno 
     //require(`./page-hot-reloader`)(graphqlRunner);
-</h2>
+</h3>
 
 Kick off your project with this inferno boilerplate. This barebones starter ships with the main Gatsby configuration files you might need. 
 
