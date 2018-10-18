@@ -2,5 +2,4 @@
 # deep copy script
 export NOYARNPOSTINSTALL="yes"
  
-cp -Rf ./inferno/inferno ./node_modules/ 
-cp -Rf ./inferno/inferno-* ./node_modules/ 
+cp -Rf ./gatsbyhack/gatsby ./node_modules/ 
