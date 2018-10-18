@@ -130,9 +130,10 @@ exports.onCreatePage = ({
 
   const updatedAt = page.updatedAt,
         pageWithoutUpdated = (0, _objectWithoutPropertiesLoose2.default)(page, ["updatedAt"]); // Add page.
+        const pp=page.matchPath?page.matchPath:page.path;
 
   createNode(Object.assign({}, pageWithoutUpdated, {
-    id: createPageId(page.path),
+    id: createPageId(pp),
     parent: `SOURCE`,
     children: [],
     internal: {
@@ -145,7 +146,8 @@ exports.onCreatePage = ({
 
 
 emitter.on(`DELETE_PAGE`, action => {
-  const nodeId = createPageId(action.payload.path);
+   const pp=action.payload.matchPath?action.payload.matchPath:action.payload.path;
+  const nodeId = createPageId(pp);
   const node = getNode(nodeId);
   boundActionCreators.deleteNode({
     node

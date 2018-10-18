@@ -1,7 +1,7 @@
 {
   "name": "gatsby",
   "description": "Blazing fast modern site generator for React",
-  "version": "2.0.19",
+  "version": "2.0.0-rc.25",
   "author": "Kyle Mathews <mathews.kyle@gmail.com>",
   "bin": {
     "gatsby": "./dist/bin/gatsby.js"
@@ -32,8 +32,6 @@
     "babel-plugin-remove-graphql-queries": "^2.0.2-rc.3",
     "better-queue": "^3.8.6",
     "bluebird": "^3.5.0",
-    "cache-manager": "^2.9.0",
-    "cache-manager-fs-hash": "^0.0.6",
     "chalk": "^2.3.2",
     "chokidar": "^2.0.2",
     "common-tags": "^1.4.0",
@@ -63,14 +61,14 @@
     "flat": "^4.0.0",
     "friendly-errors-webpack-plugin": "^1.6.1",
     "fs-extra": "^5.0.0",
-    "gatsby-cli": "^2.4.2",
-    "gatsby-link": "^2.0.4",
-    "gatsby-plugin-page-creator": "^2.0.1",
-    "gatsby-react-router-scroll": "^2.0.0",
+    "gatsby-cli": "^2.0.0-rc.5",
+    "gatsby-link": "^2.0.0-rc.3",
+    "gatsby-plugin-page-creator": "^2.0.0-rc.5",
+    "gatsby-react-router-scroll": "^2.0.0-rc.2",
     "glob": "^7.1.1",
     "graphql": "^0.13.2",
     "graphql-relay": "^0.5.5",
-    "graphql-skip-limit": "^2.0.0",
+    "graphql-skip-limit": "^2.0.0-rc.3",
     "graphql-tools": "^3.0.4",
     "graphql-type-json": "^0.2.1",
     "hash-mod": "^0.0.5",
@@ -136,6 +134,7 @@
     "@babel/preset-react": "^7.0.0",
     "@babel/runtime": "^7.0.0",
     "cross-env": "^5.1.4",
+    "jest": "^22.4.3",
     "lerna": "^2.9.0",
     "nyc": "^7.0.0",
     "rimraf": "^2.6.1"
@@ -186,5 +185,5 @@
   "yargs": {
     "boolean-negation": false
   },
-  "gitHead": "4339821df003d0ea6ffbff3adb53a4ba4d0c5241"
+  "gitHead": "2ae6ce14015314fa1719cf488770cbf676782cd5"
 }

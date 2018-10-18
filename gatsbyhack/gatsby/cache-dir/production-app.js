@@ -1,6 +1,6 @@
 import { apiRunner, apiRunnerAsync } from "./api-runner-browser"
 import React, { createElement } from "react"
-import ReactDOM from "react-dom"
+import ReactDOM, {hydrate} from "react-dom"
 import { Router, navigate } from "@reach/router"
 import { match } from "@reach/router/lib/utils"
 import { ScrollContext } from "gatsby-react-router-scroll"
@@ -14,7 +14,7 @@ import emitter from "./emitter"
 window.___emitter = emitter
 import PageRenderer from "./page-renderer"
 import asyncRequires from "./async-requires"
-import loader from "./loader"
+import loader, { setApiRunnerForLoader } from "./loader"
 import loadDirectlyOr404 from "./load-directly-or-404"
 import EnsureResources from "./ensure-resources"
 
@@ -25,6 +25,7 @@ window.___loader = loader
 loader.addPagesArray([window.page])
 loader.addDataPaths({ [window.page.jsonName]: window.dataPath })
 loader.addProdRequires(asyncRequires)
+setApiRunnerForLoader(apiRunner)
 
 navigationInit()
 
@@ -115,7 +116,7 @@ apiRunnerAsync(`onClientEntry`).then(() => {
       const renderer = apiRunner(
         `replaceHydrateFunction`,
         undefined,
-        ReactDOM.hydrate
+        hydrate
       )[0]
 
       domReady(() => {

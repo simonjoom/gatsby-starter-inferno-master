@@ -140,16 +140,16 @@ module.exports = ({
 
 
   if (Object.keys(fieldsToSift).length === 1 && Object.keys(fieldsToSift)[0] === `id`) {
-    const nodePromise = resolveRecursive(getNode(siftArgs[0].id[`$eq`]), fieldsToSift, type.getFields());
-    nodePromise.then(node => {
-      if (node) {
-        createPageDependency({
-          path,
-          nodeId: node.id
-        });
-      }
-    });
-    return nodePromise;
+    const node = resolveRecursive(getNode(siftArgs[0].id[`$eq`]), fieldsToSift, type.getFields());
+
+    if (node) {
+      createPageDependency({
+        path,
+        nodeId: node.id
+      });
+    }
+
+    return node;
   }
 
   const nodesPromise = () => {

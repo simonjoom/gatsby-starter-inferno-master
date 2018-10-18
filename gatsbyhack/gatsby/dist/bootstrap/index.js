@@ -31,36 +31,39 @@ const _require2 = require(`../redux`),
 
 const loadPlugins = require(`./load-plugins`);
 
+const _require3 = require(`../utils/cache`),
+      initCache = _require3.initCache;
+
 const report = require(`gatsby-cli/lib/reporter`);
 
 const getConfigFile = require(`./get-config-file`);
 
-const tracer = require(`opentracing`).globalTracer();
-
-const preferDefault = require(`./prefer-default`); // Show stack trace on unhandled promises.
+const tracer = require(`opentracing`).globalTracer(); // Show stack trace on unhandled promises.
 
 
 process.on(`unhandledRejection`, (reason, p) => {
   report.panic(reason);
 });
 
-const _require3 = require(`../internal-plugins/query-runner/query-watcher`),
-      extractQueries = _require3.extractQueries;
+const _require4 = require(`../internal-plugins/query-runner/query-watcher`),
+      extractQueries = _require4.extractQueries;
 
-const _require4 = require(`../internal-plugins/query-runner/page-query-runner`),
-      runInitialQueries = _require4.runInitialQueries;
+const _require5 = require(`../internal-plugins/query-runner/page-query-runner`),
+      runInitialQueries = _require5.runInitialQueries;
 
 const queryQueue = require(`../internal-plugins/query-runner/query-queue`);
 
-const _require5 = require(`../internal-plugins/query-runner/pages-writer`),
-      writePages = _require5.writePages;
+const _require6 = require(`../internal-plugins/query-runner/pages-writer`),
+      writePages = _require6.writePages;
 
-const _require6 = require(`../internal-plugins/query-runner/redirects-writer`),
-      writeRedirects = _require6.writeRedirects; // Override console.log to add the source file + line number.
+const _require7 = require(`../internal-plugins/query-runner/redirects-writer`),
+      writeRedirects = _require7.writeRedirects; // Override console.log to add the source file + line number.
 // Useful for debugging if you lose a console.log somewhere.
 // Otherwise leave commented out.
 // require(`./log-line-function`)
 
+
+const preferDefault = m => m && m.default || m;
 
 module.exports =
 /*#__PURE__*/
@@ -165,7 +168,7 @@ function () {
     }); // Now that we know the .cache directory is safe, initialize the cache
     // directory.
 
-    yield fs.ensureDir(`${program.directory}/.cache`); // Ensure the public/static directory
+    initCache(); // Ensure the public/static directory
 
     yield fs.ensureDir(`${program.directory}/public/static`);
     activity.end(); // Copy our site files to the root of the site.
@@ -205,7 +208,9 @@ function () {
 
       try {
         if (env === `browser` && plugin.name === `default-site-plugin`) {
-          return slash(require.resolve(path.join(plugin.resolve, `gatsby-${env}`)));
+        console.log(process.env.NODE_ENV)
+        const dev=process.env.NODE_ENV=="production"?"-prod":"";
+          return slash(require.resolve(path.join(plugin.resolve, `gatsby-${env}${dev}`)));
         }
       } catch (e) {// ignore
       }
@@ -280,7 +285,7 @@ function () {
     });
     activity.end(); // Collect resolvable extensions and attach to program.
 
-    const extensions = [`.mjs`, `.js`, `.jsx`, `.wasm`, `.json`]; // Change to this being an action and plugins implement `onPreBootstrap`
+    const extensions = [`.js`, `.jsx`]; // Change to this being an action and plugins implement `onPreBootstrap`
     // for adding extensions.
 
     const apiResults = yield apiRunnerNode(`resolvableExtensions`, {
@@ -351,10 +356,11 @@ function () {
     activity.start();
     yield extractQueries();
     activity.end(); // Start the createPages hot reloader.
-    
+
     if (process.env.NODE_ENV !== `production`&&process.env.NODE_ENV !== `inferno`) {
       require(`./page-hot-reloader`)(graphqlRunner);
     } // Run queries
+
 
     activity = report.activityTimer(`run graphql queries`, {
       parentSpan: bootstrapSpan

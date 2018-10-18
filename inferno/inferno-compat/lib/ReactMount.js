@@ -1,1 +1,0 @@
-exports.unmountComponentAtNode = require('inferno-compat').unmountComponentAtNode;

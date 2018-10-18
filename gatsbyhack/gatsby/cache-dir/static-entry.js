@@ -47,7 +47,7 @@ Html = Html && Html.__esModule ? Html.default : Html
 
 const getPage = path => pagesObjectMap.get(path)
 
-const createElement = React.createElement
+//const createElement = React.React.createElement
 
 export default (pagePath, callback) => {
   let bodyHtml = ``
@@ -131,7 +131,7 @@ export default (pagePath, callback) => {
         pathContext: dataAndContext.pageContext,
       }
 
-      const pageElement = createElement(
+      const pageElement = React.createElement(
         syncRequires.components[page.componentChunkName],
         props
       )
@@ -149,15 +149,15 @@ export default (pagePath, callback) => {
     }
   }
 
-  const routerElement = createElement(
+  const routerElement = React.createElement(
     ServerLocation,
     { url: `${__PATH_PREFIX__}${pagePath}` },
-    createElement(
+    React.createElement(
       Router,
       {
         baseuri: `${__PATH_PREFIX__}`,
       },
-      createElement(RouteHandler, { path: `/*` })
+      React.createElement(RouteHandler, { path: `/*` })
     )
   )
 
@@ -270,7 +270,8 @@ export default (pagePath, callback) => {
     })
 
   if (page.jsonName in dataPaths) {
-    const dataPath = `${__PATH_PREFIX__}/static/d/${
+  
+    const dataPath = `/static/d/${
       dataPaths[page.jsonName]
     }.json`
     headComponents.push(

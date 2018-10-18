@@ -4,11 +4,12 @@ import domReady from "domready"
 import socketIo from "./socketIo"
 import emitter from "./emitter"
 import { apiRunner, apiRunnerAsync } from "./api-runner-browser"
-import loader from "./loader"
+import loader, { setApiRunnerForLoader } from "./loader"
 import syncRequires from "./sync-requires"
 import pages from "./pages.json"
 
 window.___emitter = emitter
+setApiRunnerForLoader(apiRunner)
 
 // Let the site/plugins run code very early.
 apiRunnerAsync(`onClientEntry`).then(() => {
@@ -48,14 +49,13 @@ apiRunnerAsync(`onClientEntry`).then(() => {
   loader.addDevRequires(syncRequires)
 
   loader.getResourcesForPathname(window.location.pathname).then(() => {
-    let Root
+  let Root
   if (process.env.NODE_ENV=="inferno"||process.env.NODE_ENV=="production"){
   Root = preferDefault(require(`./root`))
    }else{
 	var hot=require("react-hot-loader").hot;
  	 Root = hot(module)(preferDefault(require(`./root`)))
   } 
-  
     domReady(() => {
       renderer(<Root />, rootElement, () => {
         apiRunner(`onInitialClientRender`)

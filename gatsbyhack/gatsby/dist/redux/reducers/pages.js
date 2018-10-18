@@ -22,13 +22,13 @@ module.exports = (state = new Map(), action) => {
 
         action.payload.pluginCreator___NODE = action.plugin.id;
         action.payload.pluginCreatorId = action.plugin.id;
-        state.set(action.payload.path, action.payload);
+        state.set(action.payload.matchPath?action.payload.matchPath:action.payload.path, action.payload);
         return state;
       }
 
     case `DELETE_PAGE`:
       {
-        state.delete(action.payload.path);
+        state.delete(action.payload.matchPath?action.payload.matchPath:action.payload.path);
         return state;
       }
 

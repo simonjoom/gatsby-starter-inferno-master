@@ -58,6 +58,7 @@ exports.resolvableExtensions = true;
  *     )
  *   })
  * }
+ * @returns {Array} array of extensions
  */
 
 exports.createPages = true;
@@ -82,32 +83,9 @@ exports.createPagesStatefully = true;
  *
  * See also the documentation for [`createNode`](/docs/actions/#createNode).
  * @example
- * exports.sourceNodes = ({ actions, createNodeId, createContentDigest }) => {
+ * exports.sourceNodes = ({ actions }) => {
  *   const { createNode } = actions
- *
- *   // Data can come from anywhere, but for now create it manually
- *   const myData = {
- *     key: 123,
- *     foo: `The foo field of my node`,
- *     bar: `Baz`
- *   }
- *
- *   const nodeContent = JSON.stringify(myData)
- *
- *   const nodeMeta = {
- *     id: createNodeId(`my-data-${myData.key}`),
- *     parent: null,
- *     children: [],
- *     internal: {
- *       type: `MyNodeType`,
- *       mediaType: `text/html`,
- *       content: nodeContent,
- *       contentDigest: createContentDigest(myData)
- *     }
- *   }
- *
- *   const node = Object.assign({}, myData, nodeMeta)
- *   createNode(node)
+ *   // Create nodes here.
  * }
  */
 
@@ -215,9 +193,8 @@ exports.onCreateBabelConfig = true;
  * See also the documentation for [`setWebpackConfig`](/docs/actions/#setWebpackConfig).
  *
  * @param {object} $0
- * @param {string} $0.stage The current build stage. One of 'develop', 'develop-html',
- * 'build-javascript', or 'build-html'
- * @param {function} $0.getConfig Returns the current webpack config
+ * @param {'develop' | 'develop-html' | 'build-javascript' | 'build-html'} $0.stage The current build stage
+ * @param {function(): object} $0.getConfig Returns the current webpack config
  * @param {object} $0.rules A set of preconfigured webpack config rules
  * @param {object} $0.loaders A set of preconfigured webpack config loaders
  * @param {object} $0.plugins A set of preconfigured webpack config plugins

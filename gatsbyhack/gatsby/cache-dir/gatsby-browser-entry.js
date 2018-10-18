@@ -9,8 +9,9 @@ import Link, {
 } from "gatsby-link"
 import PageRenderer from "./public-page-renderer"
 import parsePath from "./parse-path"
+import createContext from 'create-react-context';
 
-const StaticQueryContext = React.createContext({})
+const StaticQueryContext = createContext({})
 
 const StaticQuery = props => (
   <StaticQueryContext.Consumer>

@@ -7,7 +7,7 @@ exports.default = void 0;
 
 var _asyncToGenerator2 = _interopRequireDefault(require("@babel/runtime/helpers/asyncToGenerator"));
 
-var _babelTraverse = _interopRequireDefault(require("babel-traverse"));
+var _babelTraverse = _interopRequireDefault(require("@babel/traverse"));
 
 var _babelParseToAst = require("../../utils/babel-parse-to-ast");
 

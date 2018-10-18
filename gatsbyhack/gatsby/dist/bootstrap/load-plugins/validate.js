@@ -123,9 +123,19 @@ const collatePluginAPIs = ({
     plugin.ssrAPIs = []; // Discover which APIs this plugin implements and store an array against
     // the plugin node itself *and* in an API to plugins map for faster lookups
     // later.
-
+let pluginBrowserExports;
     const pluginNodeExports = resolveModuleExports(`${plugin.resolve}/gatsby-node`);
-    const pluginBrowserExports = resolveModuleExports(`${plugin.resolve}/gatsby-browser`);
+    
+  const dev=process.env.NODE_ENV=="production"?"-prod":"";
+        
+  if(plugin.name=="default-site-plugin")
+     pluginBrowserExports = resolveModuleExports(`${plugin.resolve}/gatsby-browser${dev}`);
+     else
+     pluginBrowserExports = resolveModuleExports(`${plugin.resolve}/gatsby-browser`);
+     
+     if(plugin.name=="default-site-plugin")
+     console.log(plugin.name,`${plugin.resolve}/gatsby-browser${dev}`)
+     
     const pluginSSRExports = resolveModuleExports(`${plugin.resolve}/gatsby-ssr`);
 
     if (pluginNodeExports.length > 0) {

@@ -6,11 +6,8 @@ const traverse = require(`babel-traverse`).default;
 
 const get = require(`lodash/get`);
 
-const _require = require(`@babel/code-frame`),
-      codeFrameColumns = _require.codeFrameColumns;
-
-const _require2 = require(`../utils/babel-parse-to-ast`),
-      babelParseToAst = _require2.babelParseToAst;
+const _require = require(`../utils/babel-parse-to-ast`),
+      babelParseToAst = _require.babelParseToAst;
 
 const report = require(`gatsby-cli/lib/reporter`);
 /**
@@ -36,25 +33,7 @@ module.exports = (modulePath, resolver = require.resolve) => {
 
   const code = fs.readFileSync(absPath, `utf8`); // get file contents
 
-  let ast;
-
-  try {
-    ast = babelParseToAst(code, absPath);
-  } catch (err) {
-    if (err instanceof SyntaxError) {
-      // Pretty print syntax errors
-      const codeFrame = codeFrameColumns(code, {
-        start: err.loc
-      }, {
-        highlightCode: true
-      });
-      report.panic(`Syntax error in "${absPath}":\n${err.message}\n${codeFrame}`);
-    } else {
-      // if it's not syntax error, just throw it
-      throw err;
-    }
-  }
-
+  const ast = babelParseToAst(code, absPath);
   let isCommonJS = false;
   let isES6 = false; // extract names of exports from file
 

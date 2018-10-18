@@ -7,6 +7,7 @@ var _objectWithoutPropertiesLoose2 = _interopRequireDefault(require("@babel/runt
 var _asyncToGenerator2 = _interopRequireDefault(require("@babel/runtime/helpers/asyncToGenerator"));
 
 const autoprefixer = require(`autoprefixer`);
+const path = require(`path`);
 
 const flexbugs = require(`postcss-flexbugs-fixes`);
 
@@ -31,11 +32,10 @@ function () {
     program
   }) {
     const assetRelativeRoot = `static/`;
-    const vendorRegex = /(node_modules|bower_components)/;
+    const vendorRegex = /(node_modules|babelHelper|bower_components)/;
     const supportedBrowsers = program.browserslist;
     const PRODUCTION = !stage.includes(`develop`);
     const isSSR = stage.includes(`html`);
-
     const makeExternalOnly = original => (options = {}) => {
       let rule = original(options);
       rule.include = vendorRegex;
@@ -141,6 +141,12 @@ function () {
           loader: require.resolve(`./babel-loader`)
         };
       },
+     /* jso: options => {
+        return {
+          options,
+          loader: require.resolve(`./babel-loadero`)
+        };
+      },*/
       eslint: (schema = ``) => {
         const options = eslintConfig(schema);
         return {
@@ -168,37 +174,31 @@ function () {
     const rules = {};
     /**
      * Javascript loader via babel, excludes node_modules
-     */
-
+    
+     */ 
     {
       let js = (options = {}) => {
         return {
           test: /\.jsx?$/,
-          exclude: vendorRegex,
+          exclude: /(node_modules|public|babelHelper|bower_components)/,
           use: [loaders.js(options)]
         };
       };
 
       rules.js = js;
     }
-    /**
-     * mjs loader:
-     * webpack 4 has issues automatically dealing with
-     * the .mjs extension, thus we need to explicitly
-     * add this rule to use the default webpack js loader
-     */
-
-    {
-      let mjs = (options = {}) => {
-        return Object.assign({
-          test: /\.mjs$/,
-          include: /node_modules/,
-          type: `javascript/auto`
-        }, options);
+   /* {
+      let jso = (options = {}) => {
+        return {
+          test: /\.jsx?$/,
+          include:/(gatsby-|inject-|.cache)/,
+          exclude: /(node_modules|public|src|babelHelper|bower_components)/,
+          use: [loaders.jso(options)]
+        };
       };
 
-      rules.mjs = mjs;
-    }
+      rules.jso = jso;
+    }*/
     {
       let eslint = schema => {
         return {
@@ -281,7 +281,8 @@ function () {
         if (!isSSR) use.unshift(loaders.miniCssExtract());
         return {
           use,
-          test: /\.css$/
+          test: /\.css$/,
+           sideEffects: true
         };
       };
       /**
@@ -345,8 +346,33 @@ function () {
         exclude: /\.min\.js/,
         sourceMap: true,
         terserOptions: Object.assign({
+        mangle: true,
+        parse: {
+          // we want uglify-js to parse ecma 8 code. However we want it to output
+          // ecma 5 compliant code, to avoid issues with older browsers, this is
+          // whey we put `ecma: 5` to the compress and output section
+          // https://github.com/facebook/create-react-app/pull/4234
           ecma: 8,
-          ie8: false
+        },
+        compress: {
+          ecma: 5,
+          warnings: false,
+          // Disabled because of an issue with Uglify breaking seemingly valid code:
+          // https://github.com/facebook/create-react-app/issues/2376
+          // Pending further investigation:
+          // https://github.com/mishoo/UglifyJS2/issues/2011
+          comparisons: false,
+          //drop_console: true
+        },
+        output: {
+          ecma: 5,
+          comments: false,
+          // Turned on because emoji and regex is not minified properly using default
+          // https://github.com/facebook/create-react-app/issues/2488
+          ascii_only: true,
+        beautify: false,
+        comments:false
+         }
         }, terserOptions)
       }, options));
     };
@@ -364,7 +390,10 @@ function () {
     }, options));
 
     plugins.moment = () => plugins.ignore(/^\.\/locale$/, /moment$/);
-
+    plugins.babelHelpers = () => plugins.provide({
+    babelHelpers: path.resolve(__dirname,"babelHelper.js") 
+    })
+    
     return {
       loaders,
       rules: rules,
