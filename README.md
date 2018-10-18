@@ -7,9 +7,17 @@
   Gatsby's inferno starter
 </h1>
 
+
+<h2>
+Need help? 
+contact me on twitter: https://twitter.com/simon_skiscool
+</h2>
+
 <h3 align="left">
 The hack: 
 Inferno v6 stable just released!
+
+
 
 
 In cache-dir/gatsby-browser-entry force gatsby to use the polyfill create-react-context
