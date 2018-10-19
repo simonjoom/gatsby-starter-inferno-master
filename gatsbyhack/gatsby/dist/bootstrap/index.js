@@ -31,8 +31,8 @@ const _require2 = require(`../redux`),
 
 const loadPlugins = require(`./load-plugins`);
 
-const _require3 = require(`../utils/cache`),
-      initCache = _require3.initCache;
+//const _require3 = require(`../utils/cache`),
+//      initCache = _require3.initCache;
 
 const report = require(`gatsby-cli/lib/reporter`);
 
@@ -167,8 +167,8 @@ function () {
       payload: pluginsHash
     }); // Now that we know the .cache directory is safe, initialize the cache
     // directory.
-
-    initCache(); // Ensure the public/static directory
+	yield fs.ensureDir(`${program.directory}/.cache`)
+    //initCache(); // Ensure the public/static directory
 
     yield fs.ensureDir(`${program.directory}/public/static`);
     activity.end(); // Copy our site files to the root of the site.

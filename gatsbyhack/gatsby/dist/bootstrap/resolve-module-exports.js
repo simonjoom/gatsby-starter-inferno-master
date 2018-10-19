@@ -51,6 +51,7 @@ module.exports = (modulePath, resolver = require.resolve) => {
     AssignmentExpression: function AssignmentExpression(astPath) {
       const nodeLeft = astPath.node.left;
       if (nodeLeft.type !== `MemberExpression`) return; // get foo from `exports.foo = bar`
+	  if (get(nodeLeft, `property.name`) === `__esModule`) return;
 
       if (get(nodeLeft, `object.name`) === `exports`) {
         isCommonJS = true;

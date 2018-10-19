@@ -5,6 +5,7 @@ var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefau
 exports.__esModule = true;
 exports.findLinkedNode = findLinkedNode;
 exports.inferObjectStructureFromNodes = inferObjectStructureFromNodes;
+exports.clearUnionTypes = clearUnionTypes;
 
 var _objectWithoutPropertiesLoose2 = _interopRequireDefault(require("@babel/runtime/helpers/objectWithoutPropertiesLoose"));
 
@@ -46,6 +47,8 @@ const DateType = require(`./types/type-date`);
 const FileType = require(`./types/type-file`);
 
 const is32BitInteger = require(`../utils/is-32-bit-integer`);
+
+const unionTypes = new Map();
 
 function inferGraphQLType(_ref) {
   let exampleValue = _ref.exampleValue,
@@ -261,12 +264,21 @@ function inferFromFieldName(value, selector, types) {
     let type; // If there's more than one type, we'll create a union type.
 
     if (fields.length > 1) {
-      type = new GraphQLUnionType({
-        name: createTypeName(`Union_${key}_${fields.map(f => f.name).sort().join(`__`)}`),
-        description: `Union interface for the field "${key}" for types [${fields.map(f => f.name).sort().join(`, `)}]`,
-        types: fields.map(f => f.nodeObjectType),
-        resolveType: data => fields.find(f => f.name == data.internal.type).nodeObjectType
-      });
+      const typeName = `Union_${key}_${fields.map(f => f.name).sort().join(`__`)}`;
+
+      if (unionTypes.has(typeName)) {
+        type = unionTypes.get(typeName);
+      }
+
+      if (!type) {
+        type = new GraphQLUnionType({
+          name: createTypeName(`Union_${key}`),
+          description: `Union interface for the field "${key}" for types [${fields.map(f => f.name).sort().join(`, `)}]`,
+          types: fields.map(f => f.nodeObjectType),
+          resolveType: data => fields.find(f => f.name == data.internal.type).nodeObjectType
+        });
+        unionTypes.set(typeName, type);
+      }
     } else {
       type = fields[0].nodeObjectType;
     }
@@ -404,5 +416,9 @@ function _inferObjectStructureFromNodes({
 
 function inferObjectStructureFromNodes(options) {
   return _inferObjectStructureFromNodes(options, null);
+}
+
+function clearUnionTypes() {
+  unionTypes.clear();
 }
 //# sourceMappingURL=infer-graphql-type.js.map

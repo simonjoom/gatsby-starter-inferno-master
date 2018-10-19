@@ -45,7 +45,8 @@ function () {
     process.env.GATSBY_BUILD_STAGE = suppliedStage; // We combine develop & develop-html stages for purposes of generating the
     // webpack config.
 
-    const stage = suppliedStage; 
+    const stage = suppliedStage;
+console.log("suppliedStage",stage)
     const _ref2 = yield createUtils({
       stage,
       program
@@ -408,7 +409,23 @@ if((process.env.NODE_ENV)=="production")
            "lodash":"lodash-es",
             'react-dom/server': 'inferno-server',
             'react': 'inferno-compat',
-            'react-dom': 'inferno-compat'
+            'react-dom': 'inferno-compat',
+        'react-native-vector-icons/FontAwesome':
+          'expo-web/dist/exports/FontAwesome',
+        'react-native-vector-icons/MaterialIcons':
+          'expo-web/dist/exports/MaterialIcons',
+        'react-native-vector-icons/Ionicons': 'expo-web/dist/exports/Ionicons',
+        'react-native-vector-icons/MaterialCommunityIcons':
+          'expo-web/dist/exports/MaterialCommunityIcons',
+        'react-native-vector-icons/SimpleLineIcons':
+          'expo-web/dist/exports/SimpleLineIcons',
+        'react-native-vector-icons/Entypo': 'expo-web/dist/exports/Entypo',
+        './assets/images/expo-icon.png': './assets/images/expo-icon@2x.png',
+        './assets/images/slack-icon.png': './assets/images/slack-icon@2x.png',
+         'react-native-picker': directoryPath(`./src/myPicker.js`),
+           "react-native-linear-gradient": "react-native-web-linear-gradient",
+   //   "react-dom/unstable-native-dependencies": directoryPath(`./react-master/packages/react-dom/unstable-native-dependencies`),
+      "react-native": directoryPath(`./src/RNW.js`)
         }
       }
       else
@@ -444,7 +461,23 @@ if((process.env.NODE_ENV)=="production")
          // "react-hot-loader": path.dirname(require.resolve(`react-hot-loader/package.json`)),
           "react-lifecycles-compat": directoryPath(`.cache/react-lifecycles-compat.js`),
           //"create-react-context": directoryPath(`.cache/create-react-context.js`),  
-           "lodash":"lodash-es"
+           "lodash":"lodash-es",
+        'react-native-vector-icons/FontAwesome':
+          'expo-web/dist/exports/FontAwesome',
+        'react-native-vector-icons/MaterialIcons':
+          'expo-web/dist/exports/MaterialIcons',
+        'react-native-vector-icons/Ionicons': 'expo-web/dist/exports/Ionicons',
+        'react-native-vector-icons/MaterialCommunityIcons':
+          'expo-web/dist/exports/MaterialCommunityIcons',
+        'react-native-vector-icons/SimpleLineIcons':
+          'expo-web/dist/exports/SimpleLineIcons',
+        'react-native-vector-icons/Entypo': 'expo-web/dist/exports/Entypo',
+        './assets/images/expo-icon.png': './assets/images/expo-icon@2x.png',
+        './assets/images/slack-icon.png': './assets/images/slack-icon@2x.png',
+         'react-native-picker': directoryPath(`./src/myPicker.js`),
+           "react-native-linear-gradient": "react-native-web-linear-gradient",
+   //   "react-dom/unstable-native-dependencies": directoryPath(`./react-master/packages/react-dom/unstable-native-dependencies`),
+      "react-native": directoryPath(`./src/RNW.js`)
         }
       }
       if (process.env.NODE_ENV=="inferno"){

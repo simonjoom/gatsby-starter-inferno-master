@@ -14,15 +14,16 @@ const tracer = require(`opentracing`).globalTracer();
 
 const reporter = require(`gatsby-cli/lib/reporter`);
 
-const cache = require(`./cache`);
+const Cache = require(`./cache`);
 
 const apiList = require(`./api-node-docs`);
 
 const createNodeId = require(`./create-node-id`);
 
-const createContentDigest = require(`./create-content-digest`); // Bind action creators per plugin so we can auto-add
-// metadata to actions they create.
+const createContentDigest = require(`./create-content-digest`);
 
+let caches = new Map(); // Bind action creators per plugin so we can auto-add
+// metadata to actions they create.
 
 const boundPluginActionCreators = {};
 
@@ -108,6 +109,15 @@ const runAPI = (plugin, api, args) => {
     const namespacedCreateNodeId = id => createNodeId(id, plugin.name);
 
     const tracing = initAPICallTracing(pluginSpan);
+    let cache = caches.get(plugin.name);
+
+    if (!cache) {
+      cache = new Cache({
+        name: plugin.name
+      }).init();
+      caches.set(plugin.name, cache);
+    }
+
     const apiCallArgs = [Object.assign({}, args, {
       pathPrefix,
       boundActionCreators: doubleBoundActionCreators,
@@ -219,7 +229,7 @@ function () {
       } else if (api === `preprocessSource`) {
         id = `${api}${apiRunInstance.startTime}${args.filename}${args.traceId}`;
       } else if (api === `onCreatePage`) {
-        id = `${api}${apiRunInstance.startTime}${args.page.path}${args.traceId}`;
+        id = `${api}${apiRunInstance.startTime}${args.page.path}${args.page.matchPath}${args.traceId}`;
       } else {
         id = `${api}|${apiRunInstance.startTime}|${apiRunInstance.traceId}|${JSON.stringify(args)}`;
       }

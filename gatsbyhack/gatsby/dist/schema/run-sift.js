@@ -97,6 +97,13 @@ module.exports = ({
   function extractFieldsToSift(prekey, key, preobj, obj, val) {
     if (_.isPlainObject(val)) {
       _.forEach(val, (v, k) => {
+        if (k === `elemMatch`) {
+          // elemMatch is operator for arrays and not field we want to prepare
+          // so we need to skip it
+          extractFieldsToSift(prekey, key, preobj, obj, v);
+          return;
+        }
+
         preobj[prekey] = obj;
         extractFieldsToSift(key, k, obj, {}, v);
       });
@@ -125,31 +132,37 @@ module.exports = ({
       const innerSift = siftFieldsObj[k];
       const innerGqConfig = gqFields[k];
 
-      if (_.isObject(innerSift) && v != null && innerGqConfig && innerGqConfig.type && _.isFunction(innerGqConfig.type.getFields)) {
-        return resolveRecursive(v, innerSift, innerGqConfig.type.getFields());
-      } else {
-        return v;
+      if (_.isObject(innerSift) && v != null && innerGqConfig && innerGqConfig.type) {
+        if (_.isFunction(innerGqConfig.type.getFields)) {
+          // this is single object
+          return resolveRecursive(v, innerSift, innerGqConfig.type.getFields());
+        } else if (_.isArray(v) && innerGqConfig.type.ofType && _.isFunction(innerGqConfig.type.ofType.getFields)) {
+          // this is array
+          return Promise.all(v.map(item => resolveRecursive(item, innerSift, innerGqConfig.type.ofType.getFields())));
+        }
       }
+
+      return v;
     }).then(v => [k, v]))).then(resolvedFields => {
       const myNode = Object.assign({}, node);
       resolvedFields.forEach(([k, v]) => myNode[k] = v);
       return myNode;
     });
-  } // If the the query only has a filter for an "id", then we'll just grab
-  // that ID and return it.
+  } // If the the query for single node only has a filter for an "id"
+  // using "eq" operator, then we'll just grab that ID and return it.
 
 
-  if (Object.keys(fieldsToSift).length === 1 && Object.keys(fieldsToSift)[0] === `id`) {
-    const node = resolveRecursive(getNode(siftArgs[0].id[`$eq`]), fieldsToSift, type.getFields());
-
-    if (node) {
-      createPageDependency({
-        path,
-        nodeId: node.id
-      });
-    }
-
-    return node;
+  if (!connection && Object.keys(fieldsToSift).length === 1 && Object.keys(fieldsToSift)[0] === `id` && Object.keys(siftArgs[0].id).length === 1 && Object.keys(siftArgs[0].id)[0] === `$eq`) {
+    const nodePromise = resolveRecursive(getNode(siftArgs[0].id[`$eq`]), fieldsToSift, type.getFields());
+    nodePromise.then(node => {
+      if (node) {
+        createPageDependency({
+          path,
+          nodeId: node.id
+        });
+      }
+    });
+    return nodePromise;
   }
 
   const nodesPromise = () => {

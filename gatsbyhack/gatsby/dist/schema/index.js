@@ -22,12 +22,16 @@ const _require3 = require(`../redux`),
 
 const invariant = require(`invariant`);
 
+const _require4 = require(`./infer-graphql-type`),
+      clearUnionTypes = _require4.clearUnionTypes;
+
 module.exports =
 /*#__PURE__*/
 function () {
   var _ref = (0, _asyncToGenerator2.default)(function* ({
     parentSpan
   }) {
+    clearUnionTypes();
     const typesGQL = yield buildNodeTypes({
       parentSpan
     });

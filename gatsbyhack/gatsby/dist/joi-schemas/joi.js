@@ -6,6 +6,7 @@ exports.nodeSchema = exports.pageSchema = exports.gatsbyConfigSchema = void 0;
 const Joi = require(`joi`);
 
 const gatsbyConfigSchema = Joi.object().keys({
+  __experimentalThemes: Joi.array(),
   polyfill: Joi.boolean(),
   siteMetadata: Joi.object(),
   pathPrefix: Joi.string(),
